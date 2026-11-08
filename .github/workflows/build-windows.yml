@@ -19,7 +19,9 @@ jobs:
 
       - name: Point vpn_service at the in-repo stub package
         shell: bash
-        run: sed -i 's#path: ../vpn-service/#path: packages/vpn_service#' pubspec.yaml
+        run: |
+          sed -i 's#path: ../vpn-service/#path: packages/vpn_service#' pubspec.yaml
+          grep -n "vpn_service" pubspec.yaml
 
       - name: pub get
         shell: bash
