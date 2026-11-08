@@ -1,0 +1,17 @@
+name: ci-mihomo-core
+on:
+  push:
+    paths: ['packages/mihomo_core/**', '.github/workflows/ci-mihomo-core.yml']
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/mihomo_core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - run: dart pub get
+      - run: dart analyze
+      - run: dart test
