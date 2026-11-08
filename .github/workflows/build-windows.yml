@@ -1,0 +1,63 @@
+name: build-windows
+on:
+  workflow_dispatch:
+    inputs:
+      mihomo_tag:
+        description: 'MetaCubeX/mihomo release tag (e.g. v1.19.0). Leave empty to skip bundling.'
+        required: false
+        default: ''
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Point vpn_service at the in-repo stub package
+        shell: bash
+        run: sed -i 's#path: ../vpn-service/#path: packages/vpn_service#' pubspec.yaml
+
+      - name: pub get
+        shell: bash
+        run: flutter pub get 2>&1 | tee pubget.log
+
+      - name: analyze (errors only, saved to a file)
+        if: always()
+        shell: bash
+        run: |
+          flutter analyze --no-pub 2>&1 | grep -E "error •" > analyze_errors.txt || true
+          echo "analyze errors: $(wc -l < analyze_errors.txt)"
+          head -n 60 analyze_errors.txt >> "$GITHUB_STEP_SUMMARY"
+
+      - name: build windows
+        shell: bash
+        run: flutter build windows --release 2>&1 | tee build.log
+
+      - name: Download mihomo
+        if: ${{ inputs.mihomo_tag != '' }}
+        shell: bash
+        run: |
+          curl -fsSL -o mihomo.zip "https://github.com/MetaCubeX/mihomo/releases/download/${{ inputs.mihomo_tag }}/mihomo-windows-amd64-${{ inputs.mihomo_tag }}.zip"
+          unzip -o mihomo.zip -d build/windows/x64/runner/Release/
+          mv build/windows/x64/runner/Release/mihomo-windows-amd64.exe build/windows/x64/runner/Release/mihomo.exe
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: |
+            pubget.log
+            analyze_errors.txt
+            build.log
+          if-no-files-found: ignore
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: build/windows/x64/runner/Release/
