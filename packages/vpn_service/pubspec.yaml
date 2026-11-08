@@ -1,0 +1,11 @@
+name: vpn_service
+description: STUB replacement for Karing's missing vpn-service plugin. Pure Dart, desktop only, backed by mihomo_core.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  mihomo_core:
+    path: ../mihomo_core

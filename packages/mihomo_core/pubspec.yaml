@@ -1,0 +1,14 @@
+name: mihomo_core
+description: Pure-Dart controller for the mihomo (Clash.Meta) core - process lifecycle, REST API client, config builder, Windows system proxy.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  yaml: ^3.1.2
+
+dev_dependencies:
+  test: ^1.24.0
+  lints: ^4.0.0
